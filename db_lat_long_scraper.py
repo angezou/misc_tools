@@ -31,7 +31,7 @@ def retrieve_ndvi(point_lat, point_lon, time_of_interest):
     selected_bands = ["nir", "red"]
     data = load([selected_item], bands=selected_bands, bbox = [point_lon - 0.0005, point_lat - 0.0005, point_lon + 0.0005, point_lat + 0.0005]).isel(time=0)
     sentinel_df = data.to_dataframe()
-    sentinel_df["ndvi"] = (sentinel_df["nir"] - sentinel_df["red"])/(sentinel_df["nir"] + sentinel_df["red"])
+    sentinel_df["ndvi"] = (sentinel_df["nir"].astype(float) - sentinel_df["red"].astype(float))/(sentinel_df["nir"].astype(float) + sentinel_df["red"].astype(float))
     avg_ndvi = sum(sentinel_df['ndvi'])/len(sentinel_df['ndvi'])
     return(avg_ndvi)
 
