@@ -1,0 +1,133 @@
+gene fasta sequences for ['Klebsiella grimontii', 'Klebsiella quasivariicola', 'Klebsiella pasteurii', 'Klebsiella quasipneumoniae', 'Klebsiella michiganensis', 'Klebsiella variicola subsp. variicola']
+
+
+1. nifH
+nitrogenase iron protein [Klebsiella grimontii]
+Other Aliases: ACE3MN_RS09135, ACE3MN_09135
+Other Designations: nitrogenase iron protein
+ID: 97394580
+
+2. nifH
+nitrogenase iron protein [Klebsiella grimontii]
+Other Aliases: FN634_RS09525
+Other Designations: nitrogenase iron protein
+Chromosome: 1
+This record was discontinued.
+ID: 64336658
+
+3. nifH
+nitrogenase iron protein [Klebsiella grimontii]
+Other Aliases: EHW69_RS09895
+Other Designations: nitrogenase iron protein
+This record was discontinued.
+ID: 52115353
+
+4. nifH
+nitrogenase iron protein [Klebsiella quasivariicola]
+Other Aliases: LGM30_RS08735, LGM30_08750
+Other Designations: nitrogenase iron protein
+ID: 69754478
+
+5. nifH
+nitrogenase iron protein [Klebsiella quasivariicola]
+Other Aliases: E9626_RS21800, SB00033_04166
+Other Designations: nitrogenase iron protein
+This record was discontinued.
+ID: 61333775
+
+6. nifH
+nitrogenase iron protein [Klebsiella quasivariicola]
+Other Aliases: E9590_RS06505, SB6094_03031
+Other Designations: nitrogenase iron protein
+This record was discontinued.
+ID: 56999911
+
+7. nifH
+nitrogenase iron protein [Klebsiella quasivariicola]
+Other Aliases: B8P98_RS09585, B8P98_09580
+Other Designations: nitrogenase iron protein
+This record was discontinued.
+ID: 56104857
+
+8. nifH
+nitrogenase iron protein [Klebsiella pasteurii]
+Other Aliases: KCG39_RS09160, KCG39_09160
+Other Designations: nitrogenase iron protein
+ID: 77226122
+
+9. nifH
+nitrogenase iron protein [Klebsiella pasteurii]
+Other Aliases: FN077_RS06255, SB6415_05118
+Other Designations: nitrogenase iron protein
+This record was discontinued.
+ID: 61283970
+
+10. nifH
+nitrogenase iron protein [Klebsiella quasipneumoniae]
+Other Aliases: LA349_RS04285, LA349_04285
+Other Designations: nitrogenase iron protein
+ID: 93249751
+
+11. nifH
+nitrogenase iron protein [Klebsiella quasipneumoniae]
+Other Aliases: I8N75_RS08335, I8N75_08335
+Other Designations: nitrogenase iron protein
+This record was discontinued.
+ID: 64294505
+
+12. nifH
+nitrogenase iron protein [Klebsiella quasipneumoniae]
+Other Aliases: AVR78_RS10180, AVR78_21510
+Other Designations: nitrogenase iron protein
+This record was discontinued.
+ID: 46802166
+
+13. nifH
+nitrogenase iron protein [Klebsiella michiganensis]
+Other Aliases: JLG71_RS09315, THOKLE011_18180
+Other Designations: nitrogenase iron protein
+ID: 66558925
+
+14. nifH
+nitrogenase iron protein [Klebsiella michiganensis]
+Other Aliases: H5403_RS09480, H5403_09480
+Other Designations: nitrogenase iron protein
+This record was discontinued.
+ID: 61342026
+
+15. nifH
+nitrogenase iron protein [Klebsiella michiganensis]
+Other Aliases: FN419_RS13510
+Other Designations: nitrogenase iron protein
+This record was discontinued.
+ID: 58441412
+
+16. nifH
+nitrogenase iron protein [Klebsiella michiganensis E718]
+Other Aliases: A225_RS18820, A225_3835
+Other Designations: nitrogenase iron protein
+Annotation:  NC_018106.1 (4032565..4033446)
+This record was discontinued.
+ID: 45518531
+
+17. A225_3835
+nitrogenase (molybdenum-iron) reductase and maturation protein NifH [Klebsiella oxytoca E718]
+Other Aliases: A225_3835
+Annotation:  NC_018106.1 (4032565..4033446)
+This record was discontinued.
+ID: 13306213
+
+18. KOX_24920
+nitrogenase iron protein [Klebsiella oxytoca KCTC 1686]
+Other Aliases: KOX_24920
+Annotation:  NC_016612.1 (5366231..5367112)
+This record was discontinued.
+ID: 11661859
+
+19. nifH
+nitrogenase iron protein [Klebsiella variicola subsp. variicola]
+Other Aliases: LGN93_RS08775, LGN93_08775
+Other Designations: nitrogenase iron protein
+ID: 93272316
+
+

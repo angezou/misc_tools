@@ -47,10 +47,41 @@ retrieve_fasta_seqs(search_term="nifh nitrogenase iron protein",
                    email_address="angezou@gmail.com",
                    filename="nifh_Brady_output.txt")
 
-#retriee all nucleotide sequences for nifH found in Bradyrhizobium elkanii
+#retrieve all nucleotide sequences for nifH found in Bradyrhizobium elkanii
 retrieve_fasta_seqs(search_term="nifh nitrogenase iron protein", 
                    search_db="protein",
                    organism="Klebsiella", 
                    max_len=500, 
                    email_address="angezou@gmail.com",
                    filename="nifh_Klebsiella_output.txt")
+
+
+#retrieve all bacterial species that contain gene 
+nifh = retrieve_associated_tax(search_term="nifh nitrogenase iron protein", 
+                   search_db="protein",
+                   organism="Klebsiella variicola", 
+                   max_len=800, 
+                   email_address="angezou@gmail.com")
+
+nifd = retrieve_associated_tax(search_term="nitrogenase molybdenum-iron protein alpha chain", 
+                   search_db="protein",
+                   organism="Klebsiella variicola", 
+                   max_len=800, 
+                   email_address="angezou@gmail.com")
+
+nifk2 = retrieve_associated_tax(search_term="nitrogenase molybdenum-iron protein subunit beta", 
+                   search_db="protein",
+                   organism="Klebsiella variicola", 
+                   max_len=800, 
+                   email_address="angezou@gmail.com")
+
+nitrogen_fixers = list(set(nifh).intersection(nifd,nifk))
+
+retrieve_fasta_seqs(search_term="nifh nitrogenase iron protein", 
+                   search_db="gene",
+                   organism = nitrogen_fixers, 
+                   max_len=1000, 
+                   email_address="angezou@gmail.com",
+                   filename="nit_fix_output.txt")
+
+
