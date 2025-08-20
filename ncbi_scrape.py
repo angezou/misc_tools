@@ -89,6 +89,52 @@ def retrieve_seq_IDs(search_term, search_db, organism, max_len, email_address):
     return(IDs)
     
 
+
+def retrieve_associated_tax(search_term, search_db, organism, max_len, email_address):
+    Entrez.email = email_address
+    IDs = retrieve_seq_IDs(search_term, search_db, organism, max_len, email_address)
+    print('getting IDs')
+
+    handle = Entrez.efetch(db=search_db, id=IDs, retmode = "xml")
+    records = Entrez.read(handle)
+    print(len(records))
+    handle.close()
+    tax_list = []
+    for record in records:
+        if search_db == 'gene':
+            if "Gene-track_status" in record['Entrezgene_track-info']['Gene-track'] and record['Entrezgene_track-info']['Gene-track']['Gene-track_status'].attributes['value'] == 'discontinued':
+                continue
+            tax_list.append(record['Entrezgene_source']['BioSource']['BioSource_org']['Org-ref']['Org-ref_taxname'])
+        else:
+            tax_list.append(record['GBSeq_organism'])
+
+    final_taxonomy = list(set(tax_list))
+    return(final_taxonomy)
+
+
+def retrieve_fasta_from_gene(gene_list):
+    
+    for gene in gene_list:
+        
+        acc = gene['Entrezgene_locus'][1]['Gene-commentary_accession']
+        strand = gene['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_strand']['Na-strand'].attributes['value']
+        start = gene['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_to']
+        end = gene['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_from']
+                
+    if strand == 'plus':
+        handle = Entrez.efetch(db="nuccore", id=acc, rettype="fasta", strand=1, seq_start=int(end)+1,seq_stop=int(start)+1)
+        record = SeqIO.read(handle, "fasta")
+        handle.close()
+        print(record.format("fasta"))
+
+    elif strand == 'minus':
+        handle = Entrez.efetch(db="nuccore", id=acc, rettype="fasta", strand=2, seq_start=int(end)+1,seq_stop=int(start)+1)
+        record = SeqIO.read(handle, "fasta")
+        handle.close()
+        print(record.format("fasta"))
+
+gene_gb = Entrez.efetch(db="gene", id=gene, rettype="gb").read()
+        
 # retrieve fasta sequences by search term
 def retrieve_fasta_seqs(search_term, search_db, organism, max_len, email_address, filename):
     """
@@ -114,27 +160,29 @@ def retrieve_fasta_seqs(search_term, search_db, organism, max_len, email_address
         print(f'{search_db} ' + "fasta sequences for " + f'{organism}\n',file = f)
         
     with open(filename, 'a') as f:
-        print(Entrez.efetch(db=search_db, id=IDs, rettype="fasta", retmode="text").read(), file = f)
-
-
-def retrieve_associated_tax(search_term, search_db, organism, max_len, email_address):
-    Entrez.email = email_address
-    IDs = retrieve_seq_IDs(search_term, search_db, organism, max_len, email_address)
-    print('getting IDs')
-
-    handle = Entrez.efetch(db=search_db, id=IDs, retmode = "xml")
-    records = Entrez.read(handle)
-    print(len(records))
-    handle.close()
-    tax_list = []
-    for record in records:
         if search_db == 'gene':
-            if "Gene-track_status" in record['Entrezgene_track-info']['Gene-track'] and record['Entrezgene_track-info']['Gene-track']['Gene-track_status'].attributes['value'] == 'discontinued':
-                continue
-            tax_list.append(record['Entrezgene_source']['BioSource']['BioSource_org']['Org-ref']['Org-ref_taxname'])
-        else:
-            tax_list.append(record['GBSeq_organism'])
+            handle = Entrez.efetch(db=search_db, id=IDs, retmode = "xml")
+            records = Entrez.read(handle)
+            for record in records:
+                if "Gene-track_status" in record['Entrezgene_track-info']['Gene-track'] and record['Entrezgene_track-info']['Gene-track']['Gene-track_status'].attributes['value'] == 'discontinued':
+                    continue
+                
+                acc = record['Entrezgene_locus'][1]['Gene-commentary_accession']
+                strand = record['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_strand']['Na-strand'].attributes['value']
+                start = record['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_to']
+                end = record['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_from']
+                
+                if strand == 'plus':
+                    print(Entrez.efetch(db="nuccore", id=acc, rettype="fasta", strand=1, seq_start=int(end)+1,seq_stop=int(start)+1).read(), file = f)
 
-    final_taxonomy = list(set(tax_list))
-    return(final_taxonomy)
+                elif strand == 'minus':
+                    print(Entrez.efetch(db="nuccore", id=acc, rettype="fasta", strand=2, seq_start=int(end)+1,seq_stop=int(start)+1).read(), file = f)
+
+        else:
+            print(Entrez.efetch(db=search_db, id=IDs, rettype="fasta", retmode="text").read(), file = f)
+
+
+
+
+
 
