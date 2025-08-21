@@ -1,5 +1,4 @@
 from Bio import Entrez
-from Bio import SeqIO
 import pandas as pd
 
 
@@ -112,29 +111,7 @@ def retrieve_associated_tax(search_term, search_db, organism, max_len, email_add
     return(final_taxonomy)
 
 
-def retrieve_fasta_from_gene(gene_list):
-    
-    for gene in gene_list:
-        
-        acc = gene['Entrezgene_locus'][1]['Gene-commentary_accession']
-        strand = gene['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_strand']['Na-strand'].attributes['value']
-        start = gene['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_to']
-        end = gene['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_from']
-                
-    if strand == 'plus':
-        handle = Entrez.efetch(db="nuccore", id=acc, rettype="fasta", strand=1, seq_start=int(end)+1,seq_stop=int(start)+1)
-        record = SeqIO.read(handle, "fasta")
-        handle.close()
-        print(record.format("fasta"))
-
-    elif strand == 'minus':
-        handle = Entrez.efetch(db="nuccore", id=acc, rettype="fasta", strand=2, seq_start=int(end)+1,seq_stop=int(start)+1)
-        record = SeqIO.read(handle, "fasta")
-        handle.close()
-        print(record.format("fasta"))
-
-gene_gb = Entrez.efetch(db="gene", id=gene, rettype="gb").read()
-        
+       
 # retrieve fasta sequences by search term
 def retrieve_fasta_seqs(search_term, search_db, organism, max_len, email_address, filename):
     """
