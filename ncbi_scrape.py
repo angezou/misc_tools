@@ -67,7 +67,7 @@ def gene_pub_search(gene_nm, search_key, email_address, organism = None, search_
 def retrieve_seq_IDs(search_term, search_db, organism, max_len, email_address):
     Entrez.email = email_address
     if search_db == 'gene':
-        IDs = Entrez.read(Entrez.esearch(db=search_db, term= f'{search_term}' + " AND " + f'{organism}[porgn]', retmax = 10000))["IdList"]    
+        IDs = Entrez.read(Entrez.esearch(db=search_db, term= f'{search_term}' + " AND " + f'{organism}[porgn]' + " AND alive[prop]", retmax = 10000))["IdList"]    
     elif search_db in ('nucleotide','protein'):
         IDs = Entrez.read(Entrez.esearch(db=search_db, term= f'{search_term}' + " AND " + f'{organism}[porgn] ' + "AND (\"1\"[SLEN]:\"" + f'{max_len}' + "\"[SLEN])", retmax = 10000))["IdList"]
     else:
@@ -76,10 +76,9 @@ def retrieve_seq_IDs(search_term, search_db, organism, max_len, email_address):
 
     num_retstart = 10000
     num_IDs = len(IDs)
-    if num_IDs == 10000:
-
+    while num_IDs == 10000:
         if search_db == 'gene':
-            add_IDs = Entrez.read(Entrez.esearch(db=search_db, term= f'{search_term}' + " AND " + f'{organism}[porgn]', retmax = 10000, retstart = num_retstart))["IdList"]
+            add_IDs = Entrez.read(Entrez.esearch(db=search_db, term= f'{search_term}' + " AND " + f'{organism}[porgn]' + " AND alive[prop]", retmax = 10000, retstart = num_retstart))["IdList"]
         else:
             add_IDs = Entrez.read(Entrez.esearch(db=search_db, term= f'{search_term}' + " AND " + f'{organism}[porgn] '+"AND (\"1\"[SLEN]:\"" + f'{max_len}' + "\"[SLEN])", retmax = 10000, retstart = num_retstart))["IdList"]
         IDs = IDs + add_IDs
@@ -87,30 +86,71 @@ def retrieve_seq_IDs(search_term, search_db, organism, max_len, email_address):
         num_IDs = len(add_IDs)
     return(IDs)
     
-
+def retrieve_tax_from_records(records, search_db):
+    tax_list = []
+    for record in records:
+        if search_db == 'gene':
+            tax_list.append(record['Entrezgene_source']['BioSource']['BioSource_org']['Org-ref']['Org-ref_taxname'])
+        else:
+            tax_list.append(record['GBSeq_organism'])
+    return(list(set(tax_list)))
 
 def retrieve_associated_tax(search_term, search_db, organism, max_len, email_address):
     Entrez.email = email_address
     IDs = retrieve_seq_IDs(search_term, search_db, organism, max_len, email_address)
     print('getting IDs')
 
-    handle = Entrez.efetch(db=search_db, id=IDs, retmode = "xml")
-    records = Entrez.read(handle)
-    print(len(records))
-    handle.close()
-    tax_list = []
-    for record in records:
-        if search_db == 'gene':
-            if "Gene-track_status" in record['Entrezgene_track-info']['Gene-track'] and record['Entrezgene_track-info']['Gene-track']['Gene-track_status'].attributes['value'] == 'discontinued':
-                continue
-            tax_list.append(record['Entrezgene_source']['BioSource']['BioSource_org']['Org-ref']['Org-ref_taxname'])
-        else:
-            tax_list.append(record['GBSeq_organism'])
+    if len(IDs) > 9999:
+        print(len(IDs))
+        id_start = 0
+        id_left = len(IDs)
+        tax_list = []
+        while id_left > 9999:
+            
+            id_end = id_start + 9999
+            handle = Entrez.efetch(db=search_db, id=IDs[id_start:id_end], retmode = "xml")
+            records = Entrez.read(handle)
+            tax_list = tax_list + retrieve_tax_from_records(records, search_db)
+            
+            id_start = id_start + 9999
+            id_left = len(IDs) - id_start
+            print(id_left)
+        
+        handle = Entrez.efetch(db=search_db, id=IDs[id_start:len(IDs)], retmode = "xml")
+        records = Entrez.read(handle)
+        tax_list = tax_list + retrieve_tax_from_records(records, search_db)
+            
+    else:
+        handle = Entrez.efetch(db=search_db, id=IDs, retmode = "xml")
+        records = Entrez.read(handle)
+        print(len(records))
+        handle.close()
+        tax_list = retrieve_tax_from_records(records, search_db)
 
     final_taxonomy = list(set(tax_list))
     return(final_taxonomy)
 
 
+def write_fasta_seqs(search_db, IDs, filename): 
+    with open(filename, 'a') as f:
+        if search_db == 'gene':
+            handle = Entrez.efetch(db=search_db, id=IDs, retmode = "xml")
+            records = Entrez.read(handle)
+            for record in records:
+                rec_ind = len(record['Entrezgene_locus']) - 1
+                acc = record['Entrezgene_locus'][rec_ind]['Gene-commentary_accession']
+                strand = record['Entrezgene_locus'][rec_ind]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_strand']['Na-strand'].attributes['value']
+                start = record['Entrezgene_locus'][rec_ind]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_to']
+                end = record['Entrezgene_locus'][rec_ind]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_from']
+                
+                if strand == 'plus':
+                    print(Entrez.efetch(db="nuccore", id=acc, rettype="fasta", strand=1, seq_start=int(end)+1,seq_stop=int(start)+1).read(), file = f)
+
+                elif strand == 'minus':
+                    print(Entrez.efetch(db="nuccore", id=acc, rettype="fasta", strand=2, seq_start=int(end)+1,seq_stop=int(start)+1).read(), file = f)
+
+        else:
+            print(Entrez.efetch(db=search_db, id=IDs, rettype="fasta", retmode="text").read(), file = f)
        
 # retrieve fasta sequences by search term
 def retrieve_fasta_seqs(search_term, search_db, organism, max_len, email_address, filename):
@@ -135,29 +175,27 @@ def retrieve_fasta_seqs(search_term, search_db, organism, max_len, email_address
     
     with open(filename, 'w') as f:
         print(f'{search_db} ' + "fasta sequences for " + f'{organism}\n',file = f)
+
+    IDs = list(set(IDs))
+    
+    if len(IDs) > 9999:
+        print(len(IDs))
+        id_start = 0
+        id_left = len(IDs)
+        while id_left > 9999:
+   
+            id_end = id_start + 9999
+            write_fasta_seqs(search_db = search_db, IDs = IDs[id_start:id_end], filename=filename)
+            
+            id_start = id_start + 9999
+            id_left = len(IDs) - id_start
+            print(id_left)
         
-    with open(filename, 'a') as f:
-        if search_db == 'gene':
-            handle = Entrez.efetch(db=search_db, id=IDs, retmode = "xml")
-            records = Entrez.read(handle)
-            for record in records:
-                if "Gene-track_status" in record['Entrezgene_track-info']['Gene-track'] and record['Entrezgene_track-info']['Gene-track']['Gene-track_status'].attributes['value'] == 'discontinued':
-                    continue
-                
-                acc = record['Entrezgene_locus'][1]['Gene-commentary_accession']
-                strand = record['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_strand']['Na-strand'].attributes['value']
-                start = record['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_to']
-                end = record['Entrezgene_locus'][1]['Gene-commentary_seqs'][0]['Seq-loc_int']['Seq-interval']['Seq-interval_from']
-                
-                if strand == 'plus':
-                    print(Entrez.efetch(db="nuccore", id=acc, rettype="fasta", strand=1, seq_start=int(end)+1,seq_stop=int(start)+1).read(), file = f)
-
-                elif strand == 'minus':
-                    print(Entrez.efetch(db="nuccore", id=acc, rettype="fasta", strand=2, seq_start=int(end)+1,seq_stop=int(start)+1).read(), file = f)
-
-        else:
-            print(Entrez.efetch(db=search_db, id=IDs, rettype="fasta", retmode="text").read(), file = f)
-
+        write_fasta_seqs(search_db = search_db, IDs = IDs[id_start:len(IDs)], filename=filename)
+            
+    else:
+        write_fasta_seqs(search_db = search_db, IDs = IDs, filename=filename)
+        
 
 
 
