@@ -1,6 +1,7 @@
 from pystac_client import Client
 from odc.stac import load
 from datetime import datetime
+import pandas as pd
 
 
 from openmeteopy import OpenMeteo
